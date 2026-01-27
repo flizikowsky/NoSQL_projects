@@ -1,0 +1,22 @@
+1. shipments
+- id
+- tracking_number
+- origin_zip
+- destination_zip
+- status (pending, delivered)
+- weight (kg)
+- creted_at (timestamp)
+
+2. warehouses
+- id
+- name
+- zip_code
+- city
+- sqft_capacity
+
+3. courier_logs
+- id
+- shipment_id
+- vechicle_id
+- courier_id
+- timestamp

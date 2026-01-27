@@ -1,0 +1,103 @@
+#config, router, 2 shards (1 primary, 2 secondary, 1 hidden)
+services:
+
+  #---------------------------config servers---------------------------
+  configServer1:
+    image: mongo:6.0
+    container_name: configServer1
+    ports:
+      - "27017:27017"
+    command: mongod --configsvr --replSet config-rs --port 27017 --bind_ip_all
+    networks:
+      - mongo-shard-cluster
+
+  configServer2:
+    image: mongo:6.0
+    container_name: configServer2
+    command: mongod --configsvr --replSet config-rs --port 27017 --bind_ip_all
+    networks:
+      - mongo-shard-cluster
+
+  configServer3:
+    image: mongo:6.0
+    container_name: configServer3
+    command: mongod --configsvr --replSet config-rs --port 27017 --bind_ip_all
+    networks:
+      - mongo-shard-cluster
+
+  #---------------------------Shard 1---------------------------
+  shard1-primary:
+    image: mongo:6.0
+    ports:
+      - "27018:27017"
+    container_name: shard1-primary
+    command: mongod --shardsvr --replSet shard1-rs --port 27017 --bind_ip_all
+    networks:
+      - mongo-shard-cluster
+
+  shard1-secondary01:
+    image: mongo:6.0
+    container_name: shard1-secondary01
+    command: mongod --shardsvr --replSet shard1-rs --port 27017 --bind_ip_all
+    networks:
+      - mongo-shard-cluster
+
+  shard1-secondary02:
+    image: mongo:6.0
+    container_name: shard1-secondary02
+    command: mongod --shardsvr --replSet shard1-rs --port 27017 --bind_ip_all
+    networks:
+      - mongo-shard-cluster
+
+  shard1-hidden:
+    image: mongo:6.0
+    container_name: shard1-hidden
+    command: mongod --shardsvr --replSet shard1-rs --port 27017 --bind_ip_all
+    networks:
+      - mongo-shard-cluster
+
+  #---------------------------Shard 2---------------------------
+  shard2-primary:
+    image: mongo:6.0
+    ports:
+      - "27019:27017"
+    container_name: shard2-primary
+    command: mongod --shardsvr --replSet shard2-rs --port 27017 --bind_ip_all
+    networks:
+      - mongo-shard-cluster
+  shard2-secondary01:
+    image: mongo:6.0
+    container_name: shard2-secondary01
+    command: mongod --shardsvr --replSet shard2-rs --port 27017 --bind_ip_all
+    networks:
+      - mongo-shard-cluster
+  shard2-secondary02:
+    image: mongo:6.0
+    container_name: shard2-secondary02
+    command: mongod --shardsvr --replSet shard2-rs --port 27017 --bind_ip_all
+    networks:
+      - mongo-shard-cluster
+  shard2-hidden:
+    image: mongo:6.0
+    container_name: shard2-hidden
+    command: mongod --shardsvr --replSet shard2-rs --port 27017 --bind_ip_all
+    networks:
+      - mongo-shard-cluster
+
+  #---------------------------Router---------------------------
+  router:
+    image: mongo:6.0
+    container_name: router
+    command: mongos --configdb config-rs/configServer1:27017,configServer2:27017,configServer3:27017 --port 27017 --bind_ip_all
+    ports:
+      - "27021:27017"
+    networks:
+      - mongo-shard-cluster
+    depends_on:
+      - configServer1
+      - configServer2
+      - configServer3
+
+networks:
+  mongo-shard-cluster:
+    driver: bridge
